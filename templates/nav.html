@@ -1,0 +1,76 @@
+<nav class="navbar navbar-dark position-fixed fixed-top">
+    <div  class="col-lg-4 col-md-2 col-sm-4">
+        <a class="navbar-brand " href="{% url 'homePage:home' %}">Linkup</a>
+    </div>
+    {%if user.is_authenticated%}
+        <div  class="col-lg-7 col-md-7 col-sm-7 dropdown">
+            <div style="width: fit-content;" type="button" id="searchToggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <input id="userSearch" style="height: 4rem; width: 60rem;" type="text" class="search-query" placeholder="Search by username/name">
+            </div>
+            <div id="userSearchMenu" class="dropdown-menu" aria-labelledby="searchToggle">
+                <div id="notFound" style="text-align: center; color: #fff001;">
+                    <h4>Enter a valid username/Name</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="row col-lg-1 col-md-3 col-sm-1">
+
+            <div class="dropdown col-3 frieRequestList">
+                <span class="align-center" type="button" id="friendsRequest" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-user-plus"></i>
+                </span>
+
+                <div class="dropdown-menu dropdown-menu-right frieRequestMenu" aria-labelledby="friendsRequest">
+                    <div style="border-bottom:1px solid #6c757d; text-align: center; color: #fff001;">
+                        {% if not friendRequests %}
+                            <h2>No Requests</h4>
+                        {% else %}
+                            <h2>Friend Requests</h2>
+                        {% endif %}
+                    </div>
+                    
+                    {% for f in friendRequests %}
+                        <div class="frieRequestCard">
+                            <div class="row m-auto">
+                                <img class="smImg col-2 border-0" src="{{f.pfp.url}}" alt="">                        
+                                <a class="ms-2 col-6 d-inline m-auto profileLink" href="{% url 'userProfile:Profile' user=f.user.username%}">  {{f.fullName}} </a>
+                                <div class="col-4" style="align-self: center;">
+                                    <form class=" d-inline" action="{% url 'userProfile:FriendsCTRL' user=f.user.username %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="text" hidden name="_method" id="id_method" value="add">
+                                        <input type="text" hidden name="status" id="id_status" value="F">  
+                                        <input type="hidden" name="next" value="{{request.path}}" />         
+                                        <button class="btn btnNo2">Confirm</button>
+                                    </form>
+                                    <form class=" d-inline" action="{% url 'userProfile:FriendsCTRL' user=f.user.username %}" method="post">
+                                        {% csrf_token %}
+                                        <input type="text" hidden name="_method" id="id_method" value="delete">
+                                        <input type="hidden" name="next" value="{{request.path}}" />
+                                        <button class="btn btnNo1">X</button>
+                                    </form>    
+                                </div>
+                            </div>                            
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <img class="smImg col-4 border-0" src="{{userProfile.pfp.url}}" alt="">                        
+            
+            <div class="dropdown col-2">
+                <span class="align-center" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <h4>
+                        <i class="fa fa-sort-desc" aria-hidden="true"></i>
+                    </h4>
+                </span>	
+                
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton" style="margin:.65rem 0 0; border-radius: 0px;">
+                    <a class="dropdown-item" href="{% url 'userProfile:Profile' user=userProfile.user.username%}">Profile</a>
+                    <a class="dropdown-item" href="#">Support</a>
+                    <a class="dropdown-item" href="{% url 'accounts:logout' %}">Log Out</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</nav>

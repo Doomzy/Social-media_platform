@@ -1,0 +1,172 @@
+{% extends 'mainTemplate.html' %}
+    {% block title %} Profile {% endblock %}
+    {% block content %}
+    <div class="col-8 m-auto mb-5" style=" background-color: #2e2e2e;">
+        <div id="ProfileInfo">
+            <img src="{{profileInfo.pgp.url}}" class="border-bottom" width="100%" height="450px">
+            <img src="{{profileInfo.pfp.url}}" class="border" style="margin-top: -10rem;" width="150px" height="150px">
+            <h1 style="text-transform:capitalize;">
+                <span>{{profileInfo.fullName}}</span>
+            </h1>
+            <h3>{{profileInfo.bio}}</h3>
+            <ul class=" nav nav-tabs profileNav">
+                <li >
+                    <a href="#posts-tab" data-toggle="tab">Posts</a>
+                </li>
+                <li>
+                    <a href="#about-tab" data-toggle="tab">About</a>
+                </li>
+                <li>                    
+                    <a href="#friends-tab" data-toggle="tab">Friends</a>
+                </li>
+                {% if user.id == profileInfo.user.id %}
+                {% elif profileInfo in myFriendList %}
+                    <form action="{% url 'userProfile:FriendsCTRL' user=profileInfo.user.username%}" method="post">
+                        {% csrf_token %}
+                        <input type="text" hidden name="_method" id="id_method" value="delete">
+                        <button class="btn btnNo1" type="submit">Unfriend</button>
+                    </form>
+                {% elif profileInfo in friendRequests %}
+                    <form action="{% url 'userProfile:FriendsCTRL' user=profileInfo.user.username%}" method="post">
+                        {% csrf_token %}
+                        <input type="text" hidden name="_method" id="id_method" value="add">
+                        <input type="text" hidden name="status" id="id_status" value="F">
+                        <button class="btn btnNo2" type="submit">Accept request</button>
+                    </form>
+                {% elif profileInfo in sentFriendRequests %}
+                    <form action="{% url 'userProfile:FriendsCTRL' user=profileInfo.user.username%}" method="post">
+                        {% csrf_token %}
+                        <input type="text" hidden name="_method" id="id_method" value="delete">
+                        <button class="btn btnNo1" type="submit">Cancel request</button>
+                    </form>
+                {% else %}
+                    <form action="{% url 'userProfile:FriendsCTRL' user=profileInfo.user%}" method="post">
+                        {% csrf_token %}
+                        <input type="text" hidden name="_method" id="id_method" value="add">
+                        <input type="text" hidden name="status" id="id_status" value="B">
+                        <button class="btn btnNo2" type="submit">add friend</button>
+                    </form>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <div class="mt-5 col-6 m-auto mb-5">
+        <div class="tab-content">
+            <div  class="tab-pane active" id="posts-tab">
+                {% if user.id == profileInfo.user.id %}
+                <form id="newPost" action="{% url 'Posts:post' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label class="row m-auto">
+                        <img class="smImg col-4 border-0" src="{{userProfile.pfp.url}}" alt="">
+                        <textarea class="postContent" style="width: 79rem;" maxlength="10000" placeholder="create a post..."  name="content" id="id_content"></textarea>
+                    </label>
+                    <div class="row mt-5 m-auto">
+                        <label class="col-3 postCtrls" for="id_media">Image/Video</label>
+                        <input type="file" id="id_media" name="media" class="postFiles">
+                        <input type="text" hidden name="_for" value="forPost">
+                        <input type="text" hidden name="_method" value="add">
+                        <span class="col-7"></span>
+                        <button  class="col-2 btnNo2" type="submit">Post</button>
+                    </div>
+                </form>
+                {% endif %}
+                {% include 'post.html' %}
+            </div>
+            <div  class="tab-pane" id="about-tab">
+                <div class="profileTabs">
+                    <h1 class="d-inline" style="font-size: 5rem;">About:</h1>
+                    {% if user.id == profileInfo.user.id %}
+                    <button onclick="editUser('profileInfo.user.username')" class="btn btnNo2 float-end" type="submit">Edit Info</button>
+                    {% endif %}
+                    <hr>
+                    <br>
+                    <table class="profileInfo ms-5 w-100">
+                        <tr>
+                            <td><span>Full name : </span>{{profileInfo.fullName}}</td>
+                            <td class="ps-5"><span>Username/slug : </span>{{profileInfo.user.username}}</td>
+                        </tr>
+                        <tr>
+                            <td><span>E-mail : </span>{{profileInfo.email}}</td>
+                            <td class="ps-5"><span>Gender : </span>{{profileInfo.gender}}</td>
+                        </tr>
+                        <tr>
+                            <td><span>Birthdate : </span>{{profileInfo.b_date}}</td>
+                        </tr>
+                    </table>
+                    
+                    <table class="editProfileInfo hidden editForm ms-5 w-100">
+                        <form method="post" action="{% url 'userProfile:Profile' user=userProfile.user.username%}">
+                            {% csrf_token %}
+                            <tr>
+                                <td><span>First name : </span>
+                                    <input value="{{profileInfo.f_name}}" type="text" name="f_name"  id="id_f_name">
+                                </td>
+                                <td><span>Last name : </span>
+                                    <input type="text" value="{{profileInfo.l_name}}" name="l_name"  id="id_l_name">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span>E-mail : </span>
+                                    <input type="text" name="email" value="{{profileInfo.email}}">
+                                </td>
+                                <td><span>Gender : </span>
+                                    <ul id="id_gender" style="block-size:auto; ">
+                                        <li >
+                                            <label for="id_gender_0">
+                                                <i class="fa fa-female"></i>
+                                            </label>
+                                            <input type="radio" name="gender" value="F" maxlength="1" required="" id="id_gender_0">
+                                        </li>
+                                        <li>
+                                            <label for="id_gender_1">
+                                                <i class="fa fa-male"></i>
+                                            </label>
+                                            <input type="radio" name="gender" value="M" maxlength="1" required="" id="id_gender_1">
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span for="userPassword">Your Password:</span>
+                                    <input name="userPassword" type="password">
+                                </td>
+                                <td>
+                                   <button class="btn btnNo2" type="submit">Edit</button> 
+                                </td>
+                            </tr>                        
+                        </form>
+                    </table>
+                </div>
+            </div>
+            <div  class="tab-pane" id="friends-tab">
+                <div class="profileTabs">
+                    <h1 style="font-size: 5rem;">Friends:</h1>
+                    <hr>
+                    <br>
+                    <table class="ms-5 w-100">
+                        {% for f in userFriendList %}
+                        <tr>
+                            <td>
+                                <img class="smImg col-4 border-0" style="width: 6rem; height: 6rem;" src="{{f.pfp.url}}" alt="">
+                                <a class="profileLink" href="{% url 'userProfile:Profile' f.user.username%}">  {{f.fullName}} </a>
+                            </td> 
+                            <td>
+                                <form action="{% url 'userProfile:Profile' f.user%}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="text" hidden name="next" value="{% url 'userProfile:Profile' user.username%}" />         
+                                    <input type="text" hidden name="_method" id="id_method" value="delete">
+                                    {% if user.id == profileInfo.user.id %}
+                                        <button class="btn btnNo1" type="submit">unfriend</button>
+                                    {% endif %}
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+          
+    </div>
+    {% endblock %}

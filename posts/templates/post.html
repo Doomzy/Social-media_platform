@@ -1,0 +1,112 @@
+{% for p in allPosts %}
+<div class="post mt-4" id='post{{p.id}}'>
+    <div class="row">
+        <img class="smImg col-3" src="{{p.author.pfp.url}}" alt="">
+        <div class=" w-50">
+            <a class="profileLink" href="{% url 'userProfile:Profile' user=p.author.user.username%}">  {{p.author.fullName}} </a>
+            <span class="text-muted">{{p.date}}</span>
+        </div>
+        {% if user == p.author.user %}
+        <div class="dropdown text-right" style="width: 40%;">
+            <span class="align-center" type="button" id="dropdownPostOptn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-2x fa-ellipsis-h"></i>
+            </span>	
+            
+            <div class="dropdown-menu dropdown-menu-right postEditMenu" aria-labelledby="dropdownPostOptn">
+                <button onclick="editPost({{p.id}})" class="dropdown-item">Edit</button>
+                <button id="pDel{{p.id}}" data-method="delete" data-token="{{ csrf_token }}" data-postid="{{p.id}}" class="dropdown-item">Delete</button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="mt-1 postContent">
+        <h3 id="postContent{{p.id}}">{{p.content}}</h3>
+    </div>
+    <div class="mt-1 postEditForm hidden">
+        {% csrf_token %}
+        <textarea class="postEditContent" maxlength="10000" id="postEditContent{{p.id}}">{{p.content}}</textarea>
+        {% if p.media%}
+            <div class="d-block">
+                <input class="form-check-input" type="checkbox" id="noMedia{{p.id}}">
+                <label class="form-check-label" >
+                Remove Media
+                </label>
+            </div>
+        {% endif %}
+        <button id="pEdit{{p.id}}" onclick="editPost({{p.id}})" class="mt-3 btn btnNo2" data-token="{{ csrf_token }}" data-postid="{{p.id}}" data-method="edit">Save</button>
+        <button onclick="editPost({{p.id}})"  class="mt-3 btn btnNo1" type="reset">Cancel</button>
+    </div>
+    {% if p.media%}
+    <div id="postMedia{{p.id}}" class="row mt-4">
+        <img width="100%" height="400rem" src="{{p.media.url}}">
+    </div>
+    {% endif %}
+    <div class="row mt-4">
+        <div class="container">
+            <div class="float-start mt-4">
+                <p style="color: #6c757d!important;" class=" d-inline">
+                <i class="fa fa-thumbs-o-up fa-lg" aria-hidden="true"></i>
+                <span id="likesCount{{p.id}}">{{p.likes|length}}</span>
+            </p>
+            <p style="color: #6c757d!important;" class="d-inline mx-2">
+                <i class="fa fa-commenting-o fa-lg" aria-hidden="true"></i> 
+                <span id="commsCount{{p.id}}">{{p.comments|length}}</span>
+            </p>
+            </div>
+            
+            <div class="float-end">   
+                {% if userProfile.id in p.likes%}  
+                    <button id="like{{p.id}}" data-token="{{ csrf_token }}" data-method="unlike" data-postid="{{p.id}}" type="submit" class="btn btnNo1">
+                        <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                    </button>
+                {% else %}
+                <button id="like{{p.id}}" data-token="{{ csrf_token }}" data-method="like" data-postid="{{p.id}}" type="submit" class="btn btnNo2">
+                        <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                    </button>
+                {% endif %} 
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="container">
+        <hr>
+        <div id="commList{{p.id}}" class="mb-5">
+            {% for c in p.comments %}
+            <div id="commBody{{c.id}}"> 
+                <img class="smImg col-1" style="vertical-align: top; width: 40px; height: 40px;" src="{{c.user.pfp.url}}" alt="">
+                <div class="comment mb-2 d-inline-block">
+                    {% if userProfile == c.user %}
+                    <div class="dropdown float-end">
+                        <span class="align-center" type="button" id="dropdownPostOptn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-ellipsis-h" style="font-size: 2rem;"></i>
+                        </span>	
+                        
+                        <div class="dropdown-menu dropdown-menu-left postEditMenu" aria-labelledby="dropdownPostOptn">
+                            <button onclick="editComm('commBody{{c.id}}')" class="dropdown-item">Edit</button>
+                            <button id="cDel{{c.id}}" data-token="{{ csrf_token }}" data-commid="{{c.id}}" data-method="delete" class="dropdown-item" >Delete</button>
+                        </div>
+                        
+                    </div>
+                    {% endif %}
+                    <a class="profileLink" style="font-size: 1.6rem; " href="{% url 'userProfile:Profile' c.user.user.username%}">  {{c.user.fullName}} </a>
+                    <p id="commContent{{c.id}}" class="mt-2 mx-3 commContent">
+                        {{c.content}}
+                    </p>
+                    <div class="mt-1 commEditForm hidden">
+                        <textarea class="commEditContent" maxlength="10000" name="content" id="commEditArea{{c.id}}">{{c.content}}</textarea>
+                        <button onclick="editComm('commBody{{c.id}}')" class="mt-3 btn btnNo2" id="cEdit{{c.id}}" data-token="{{ csrf_token }}" data-commid="{{c.id}}" data-method="edit">Save</button>
+                        <button onclick="editComm('commBody{{c.id}}')" class="mt-3 btn btnNo1" type="reset">Cancel</button>
+                    </div>
+                </div>
+                <br>
+            </div>
+            {% endfor %}
+        </div>
+            <div class="m-auto">
+                <input type="text" class="commArea" id="commArea{{p.id}}">  
+                <button id="comment{{p.id}}" data-token="{{ csrf_token }}" data-postid="{{p.id}}" data-method="add" class="btn btnNo1">Comment</button>
+            </div> 
+        </div>    
+    </div>
+</div>
+{% endfor %}

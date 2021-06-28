@@ -1,0 +1,29 @@
+{% extends 'mainTemplate.html' %}
+    {% load static %}
+    {% block title %}Home{% endblock %}
+    {% block content %}
+        <div class="wall col-8 m-auto mb-5">
+            <div class="m-auto" style="width: 70%;">
+                <form id="newPost" action="{% url 'Posts:post' %}" method="post">
+                    {% csrf_token %}
+                    <label class="row m-auto">
+                        <img class="smImg col-4 border-0" src="{{userProfile.pfp.url}}" alt="">
+                        <textarea class="postContent" maxlength="10000" placeholder="create a post..."  name="content" id="id_content"></textarea>
+                    </label>
+                    <div class="row mt-5 m-auto">
+                        <label class="col-3 postCtrls" for="id_media">Image/Video</label>
+                        <input type="file" id="id_media" name="media" class="postFiles">
+                        <input type="text" hidden name="_for" value="forPost">
+                        <input type="text" hidden name="_method" value="add">
+                        <input type="text" hidden name="next" value="{{request.path}}" />         
+                        <span class="col-7"></span>
+                        <button  class="col-2 btnNo2" type="submit">Post</button>
+                    </div>
+                </form>
+                      
+                <div id="posts">
+                    {% include 'post.html' %}
+                </div>
+            </div>
+        </div>
+    {% endblock %}
